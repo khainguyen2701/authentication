@@ -1,4 +1,3 @@
-// Author: TrungQuanDev: https://youtube.com/@trungquandev
 import { StatusCodes } from "http-status-codes";
 import ms from "ms";
 import { env } from "~/config/env";
@@ -34,6 +33,7 @@ const login = async (req, res) => {
       env.signature_access_token,
       "1h"
     );
+
     // Create refresh token
     const refreshToken = await JWTProvider.generateToken(
       userInfo,
@@ -73,9 +73,39 @@ const logout = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    res.status(StatusCodes.OK).json({ message: " Refresh Token API success." });
+    // C1: Lấy refresh token từ cookie
+    // const refreshTokenCookies = req.cookies.refreshToken;
+    // C2: Lấy refresh token từ FE req.body
+    const refreshTokenBody = req.body.refreshToken;
+
+    const verifyToken = await JWTProvider.verifyToken(
+      refreshTokenBody,
+      env.signature_refresh_token
+    );
+
+    const user = {
+      id: verifyToken.id,
+      email: verifyToken.email
+    };
+
+    const accessToken = await JWTProvider.generateToken(
+      user,
+      env.signature_access_token,
+      "1h"
+    );
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: ms("14 days")
+    });
+
+    res.status(StatusCodes.OK).json({ accessToken });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
 };
 
