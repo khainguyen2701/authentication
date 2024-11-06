@@ -3,6 +3,12 @@
     "paths": {
       "~/*": ["./src/*"]
     },
-    "types": ["estree", "prop-types", "react", "react-dom", "react-transition-group"]
+    "types": [
+      "estree",
+      "prop-types",
+      "react",
+      "react-dom",
+      "react-transition-group"
+    ]
   }
 }

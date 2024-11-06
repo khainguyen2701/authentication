@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { logoutApi } from "~/apis";
 import axiosInstance from "~/utils/axiosConfig";
 
 function Dashboard() {
@@ -46,10 +47,8 @@ function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.delete("/v1/users/logout");
-      localStorage.removeItem("userInfo");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      await logoutApi();
+      setUser(null);
       navigate("/login");
     } catch (error) {
       toast.error(error.response?.data?.message || error?.message);
