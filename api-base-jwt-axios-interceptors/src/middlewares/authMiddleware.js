@@ -15,13 +15,13 @@ const isAuthorized = async (req, res, next) => {
   }
   try {
     const accessToken = accessTokenHeaderAuthorization.split(" ")[1];
-    const accessTokenDecoded = await JWTProvider.verifyToken(
+    const verifyToken = await JWTProvider.verifyToken(
       accessToken,
       env.signature_access_token
     );
 
-    req.jwtDecoded = accessTokenDecoded;
-    next();
+    req.jwtDecoded = verifyToken;
+    next(); //next to controller
   } catch (error) {
     // Case 410 refresh token hết hạn
     if (error.message.includes("jwt expired")) {

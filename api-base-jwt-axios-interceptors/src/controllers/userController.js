@@ -23,6 +23,7 @@ const login = async (req, res) => {
       return;
     }
 
+    // query db get user information
     const userInfo = {
       id: MOCK_DATABASE.USER.ID,
       email: MOCK_DATABASE.USER.EMAIL
@@ -31,7 +32,7 @@ const login = async (req, res) => {
     const accessToken = await JWTProvider.generateToken(
       userInfo,
       env.signature_access_token,
-      "1h"
+      5
     );
 
     // Create refresh token
@@ -91,7 +92,7 @@ const refreshToken = async (req, res) => {
     const accessToken = await JWTProvider.generateToken(
       user,
       env.signature_access_token,
-      "1h"
+      5
     );
 
     res.cookie("accessToken", accessToken, {
