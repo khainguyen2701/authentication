@@ -5,6 +5,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { corsOptions } from "~/config/corsOptions";
 import { APIs_V1 } from "~/routes/v1/";
+import exitHook from "async-exit-hook";
+import { closeMongodb, connectToMongodb } from "./config/mongodb";
+import { errorBoundary } from "./middlewares/errorMiddleware";
+import { formatResponseMiddleware } from "./middlewares/formatResponseMiddlware";
 
 const START_SERVER = () => {
   // Init Express App
@@ -24,8 +28,12 @@ const START_SERVER = () => {
   // Enable req.body json data
   app.use(express.json());
 
+  app.use(formatResponseMiddleware);
+
   // Use Route APIs V1
   app.use("/v1", APIs_V1);
+
+  app.use(errorBoundary);
 
   const LOCAL_DEV_APP_PORT = 8017;
   const LOCAL_DEV_APP_HOST = "localhost";
@@ -35,12 +43,17 @@ const START_SERVER = () => {
       `Local DEV: Hello ${AUTHOR}, Back-end Server is running successfully at Host: ${LOCAL_DEV_APP_HOST} and Port: ${LOCAL_DEV_APP_PORT}`
     );
   });
+
+  exitHook(() => {
+    closeMongodb();
+  });
 };
 
 (async () => {
   try {
     // Start Back-end Server
     console.log("Starting Server...");
+    await connectToMongodb();
     START_SERVER();
   } catch (error) {
     console.error(error);

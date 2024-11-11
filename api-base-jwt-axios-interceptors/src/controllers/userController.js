@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import ms from "ms";
 import { env } from "~/config/env";
 import { JWTProvider } from "~/providers/JwtProvider";
+import ApiError from "~/until/apiError";
 
 const MOCK_DATABASE = {
   USER: {
@@ -11,16 +12,18 @@ const MOCK_DATABASE = {
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     if (
       req.body.email !== MOCK_DATABASE.USER.EMAIL ||
       req.body.password !== MOCK_DATABASE.USER.PASSWORD
     ) {
-      res
-        .status(StatusCodes.FORBIDDEN)
-        .json({ message: "Your email or password is incorrect!" });
-      return;
+      const error = new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Your email or password is incorrect!",
+        []
+      );
+      throw error;
     }
 
     // query db get user information
@@ -56,23 +59,33 @@ const login = async (req, res) => {
       maxAge: ms("14 days")
     });
 
-    res.status(StatusCodes.OK).json({ ...userInfo, accessToken, refreshToken });
+    res.actionResponse(
+      "get",
+      { ...userInfo, accessToken, refreshToken },
+      StatusCodes.OK,
+      "Login API success!"
+    );
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
+    next(error);
   }
 };
 
-const logout = async (req, res) => {
+const logout = async (req, res, next) => {
   try {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
-    res.status(StatusCodes.OK).json({ message: "Logout API success!" });
+    res.actionResponse("get", {}, StatusCodes.OK, "Logout API success!");
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
+    const resError = ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      error.message || "Internal Server Error",
+      []
+    );
+    next(resError);
   }
 };
 
-const refreshToken = async (req, res) => {
+const refreshToken = async (req, res, next) => {
   try {
     // C1: Lấy refresh token từ cookie
     // const refreshTokenCookies = req.cookies.refreshToken;
@@ -102,11 +115,14 @@ const refreshToken = async (req, res) => {
       maxAge: ms("14 days")
     });
 
-    res.status(StatusCodes.OK).json({ accessToken });
+    res.actionResponse("get", { accessToken }, StatusCodes.OK);
   } catch (error) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: error.message });
+    const resError = ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      error.message || "Internal Server Error",
+      []
+    );
+    next(resError);
   }
 };
 
