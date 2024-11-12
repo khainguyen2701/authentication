@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import ms from "ms";
 import { env } from "~/config/env";
 import { JWTProvider } from "~/providers/JwtProvider";
+import { loginService } from "~/services/userService";
 import ApiError from "~/until/apiError";
 
 const MOCK_DATABASE = {
@@ -14,33 +15,21 @@ const MOCK_DATABASE = {
 
 const login = async (req, res, next) => {
   try {
-    if (
-      req.body.email !== MOCK_DATABASE.USER.EMAIL ||
-      req.body.password !== MOCK_DATABASE.USER.PASSWORD
-    ) {
-      const error = new ApiError(
-        StatusCodes.FORBIDDEN,
-        "Your email or password is incorrect!",
-        []
-      );
-      throw error;
-    }
+    const user = await loginService({
+      email: req.body.email,
+      password: req.body.password
+    });
 
-    // query db get user information
-    const userInfo = {
-      id: MOCK_DATABASE.USER.ID,
-      email: MOCK_DATABASE.USER.EMAIL
-    };
     // Create access token
     const accessToken = await JWTProvider.generateToken(
-      userInfo,
+      user,
       env.signature_access_token,
       5
     );
 
     // Create refresh token
     const refreshToken = await JWTProvider.generateToken(
-      userInfo,
+      user,
       env.signature_refresh_token,
       "14 days"
     );
@@ -61,7 +50,7 @@ const login = async (req, res, next) => {
 
     res.actionResponse(
       "get",
-      { ...userInfo, accessToken, refreshToken },
+      { ...user, accessToken, refreshToken },
       StatusCodes.OK,
       "Login API success!"
     );

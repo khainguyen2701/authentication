@@ -12,6 +12,6 @@ export const errorBoundary = (err, req, res, next) => {
     stack: err?.stack,
     errors: err.errors || []
   };
-  if (env.buildMode === "dev") delete responseError.stack;
+  if (env.buildMode !== "dev") delete responseError.stack;
   return res.status(responseError.statusCode).json(responseError);
 };
