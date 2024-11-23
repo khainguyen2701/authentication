@@ -4,7 +4,7 @@ const access = async (req, res) => {
   try {
     const jwtDecoded = req.jwtDecoded;
     const userInfo = {
-      id: jwtDecoded.id,
+      id: jwtDecoded._id,
       email: jwtDecoded.email
     };
 

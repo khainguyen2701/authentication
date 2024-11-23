@@ -2,16 +2,13 @@ import { StatusCodes } from "http-status-codes";
 import ms from "ms";
 import { env } from "~/config/env";
 import { JWTProvider } from "~/providers/JwtProvider";
-import { loginService } from "~/services/userService";
+import {
+  detailUserService,
+  get2FA_QRCode_Service,
+  loginService,
+  profileService
+} from "~/services/userService";
 import ApiError from "~/until/apiError";
-
-const MOCK_DATABASE = {
-  USER: {
-    ID: "sample-id-12345678",
-    EMAIL: "khai.dev27@gmail.com",
-    PASSWORD: "123456789"
-  }
-};
 
 const login = async (req, res, next) => {
   try {
@@ -94,7 +91,7 @@ const refreshToken = async (req, res, next) => {
     const accessToken = await JWTProvider.generateToken(
       user,
       env.signature_access_token,
-      5
+      "14 days"
     );
 
     res.cookie("accessToken", accessToken, {
@@ -115,8 +112,46 @@ const refreshToken = async (req, res, next) => {
   }
 };
 
+const getUserProfile = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const profile = await detailUserService({
+      id: id
+    });
+
+    res.actionResponse(
+      "get",
+      { ...profile },
+      StatusCodes.OK,
+      "Get User Profile API success!"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const get2FA_QRCode = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const twoFA = await get2FA_QRCode_Service({
+      id: id
+    });
+
+    res.actionResponse(
+      "get",
+      { ...twoFA },
+      StatusCodes.OK,
+      "Get 2FA QRCode success!"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const userController = {
   login,
   logout,
-  refreshToken
+  refreshToken,
+  getUserProfile,
+  get2FA_QRCode
 };
