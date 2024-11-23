@@ -11,3 +11,7 @@ export const refreshTokenApi = async (refreshToken) => {
     refreshToken
   });
 };
+
+export const get2FA_QRCode = async (id) => {
+  return await axiosInstance.get(`/v1/users/${id}/get_2fa_qr_code`);
+};

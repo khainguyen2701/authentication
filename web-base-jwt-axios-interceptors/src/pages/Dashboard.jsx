@@ -8,18 +8,21 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutApi } from "~/apis";
+import Setup2FA from "~/components/Setup2FA";
 import axiosInstance from "~/utils/axiosConfig";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  const [openSetup2FA, setOpenSetup2FA] = useState(false);
+
   useEffect(() => {
+    const id = JSON.parse(localStorage.getItem("userInfo"))?.id;
     const fetchData = async () => {
       try {
-        const res = await axiosInstance.get("/v1/dashboards/access");
-        console.log(res.data);
-        setUser(res.data);
+        const res = await axiosInstance.get(`/v1/users/profile/${id}`);
+        setUser(res.data?.data);
       } catch (error) {
         toast.error(error.response?.data?.message || error?.message);
       }
@@ -80,9 +83,26 @@ function Dashboard() {
       </Alert>
 
       <Divider sx={{ my: 2 }} />
-      <Button variant="contained" color="primary" onClick={handleLogout}>
-        Logout
-      </Button>
+      <Box sx={{ display: "flex", gap: "16px", justifyContent: "flex-end" }}>
+        {!user.require_2fa && (
+          <Button
+            type="button"
+            variant="contained"
+            color="warning"
+            onClick={() => setOpenSetup2FA(true)}
+          >
+            Enable 2FA
+          </Button>
+        )}
+        <Button variant="contained" color="primary" onClick={handleLogout}>
+          Logout
+        </Button>
+      </Box>
+      <Setup2FA
+        isOpen={openSetup2FA}
+        toggleOpen={setOpenSetup2FA}
+        user={user}
+      />
     </Box>
   );
 }

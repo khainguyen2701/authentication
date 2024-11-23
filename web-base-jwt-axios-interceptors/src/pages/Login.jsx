@@ -23,16 +23,15 @@ function Login() {
   const submitLogIn = async (data) => {
     try {
       const res = await axiosInstance.post("/v1/users/login", data);
+      const user = res?.data?.data;
       const userInfo = {
-        id: res.data.id,
-        email: res.data.email
+        id: user._id,
+        email: user.email,
+        isEnable2FA: user.enable_2fa
       };
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
-      localStorage.setItem("accessToken", JSON.stringify(res.data.accessToken));
-      localStorage.setItem(
-        "refreshToken",
-        JSON.stringify(res.data.refreshToken)
-      );
+      localStorage.setItem("accessToken", JSON.stringify(user.accessToken));
+      localStorage.setItem("refreshToken", JSON.stringify(user.refreshToken));
       navigate("/dashboard");
     } catch (error) {
       toast.error(error);

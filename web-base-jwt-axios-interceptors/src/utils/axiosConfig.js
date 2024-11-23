@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(
         const refreshToken = JSON.parse(localStorage.getItem("refreshToken"));
         holdPromiseRefreshToken = refreshTokenApi(refreshToken)
           .then((response) => {
-            const { accessToken } = response.data;
+            const { accessToken } = response.data.data;
             localStorage.setItem("accessToken", JSON.stringify(accessToken));
             axiosInstance.defaults.headers[
               "Authorization"
