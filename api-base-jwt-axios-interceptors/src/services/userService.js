@@ -1,7 +1,9 @@
+import { pick } from "lodash";
 import {
   detailUserModel,
   get2FA_QRCode_Model,
-  loginModel
+  loginModel,
+  setup2FA_Model
 } from "~/models/userModels";
 
 /* eslint-disable no-useless-catch */
@@ -27,6 +29,24 @@ export const get2FA_QRCode_Service = async ({ id }) => {
   try {
     const twoFA = await get2FA_QRCode_Model({ id });
     return twoFA;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const setup2FA_Service = async ({ id, clientOtpToken, userAgent }) => {
+  try {
+    const twoFA = await setup2FA_Model({ id, clientOtpToken, userAgent });
+    const pickUser = pick(twoFA, [
+      "_id",
+      "email",
+      "enable_2fa",
+      "is_2fa_verified",
+      "last_login",
+      "is_2fa_verified",
+      "device_id"
+    ]);
+    return pickUser;
   } catch (error) {
     throw error;
   }

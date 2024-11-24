@@ -6,7 +6,8 @@ import {
   detailUserService,
   get2FA_QRCode_Service,
   loginService,
-  profileService
+  profileService,
+  setup2FA_Service
 } from "~/services/userService";
 import ApiError from "~/until/apiError";
 
@@ -148,10 +149,33 @@ const get2FA_QRCode = async (req, res, next) => {
   }
 };
 
+const setup2FA = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const clientOtpToken = req.body.otpToken;
+    const userAgent = `${req.headers["user-agent"]}-${new Date().valueOf()}`;
+    const twoFA = await setup2FA_Service({
+      id: id,
+      clientOtpToken: clientOtpToken,
+      userAgent: userAgent
+    });
+
+    res.actionResponse(
+      "get",
+      { ...twoFA },
+      StatusCodes.OK,
+      "Get 2FA QRCode success!"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const userController = {
   login,
   logout,
   refreshToken,
   getUserProfile,
-  get2FA_QRCode
+  get2FA_QRCode,
+  setup2FA
 };
