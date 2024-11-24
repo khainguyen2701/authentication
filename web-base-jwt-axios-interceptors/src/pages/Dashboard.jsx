@@ -58,6 +58,12 @@ function Dashboard() {
     }
   };
 
+  const handleSuccess2FA = (userUpdated) => {
+    setUser(userUpdated);
+    localStorage.setItem("userInfo", JSON.stringify(userUpdated));
+    setOpenSetup2FA(false);
+  };
+
   return (
     <Box
       sx={{
@@ -84,7 +90,7 @@ function Dashboard() {
 
       <Divider sx={{ my: 2 }} />
       <Box sx={{ display: "flex", gap: "16px", justifyContent: "flex-end" }}>
-        {!user.require_2fa && (
+        {!user.enable_2fa && (
           <Button
             type="button"
             variant="contained"
@@ -102,6 +108,7 @@ function Dashboard() {
         isOpen={openSetup2FA}
         toggleOpen={setOpenSetup2FA}
         user={user}
+        handleSuccess={handleSuccess2FA}
       />
     </Box>
   );

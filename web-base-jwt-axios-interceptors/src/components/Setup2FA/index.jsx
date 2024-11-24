@@ -7,10 +7,10 @@ import SecurityIcon from "@mui/icons-material/Security";
 import CancelIcon from "@mui/icons-material/Cancel";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { get2FA_QRCode } from "~/apis";
+import { get2FA_QRCode, setup2FA } from "~/apis";
 import { CircularProgress } from "@mui/material";
 
-function Setup2FA({ isOpen, toggleOpen, user }) {
+function Setup2FA({ isOpen, toggleOpen, user, handleSuccess }) {
   const [otpToken, setConfirmOtpToken] = useState("");
   const [error, setError] = useState(null);
   const [qr2FA, setQr2FA] = useState(null);
@@ -27,7 +27,11 @@ function Setup2FA({ isOpen, toggleOpen, user }) {
       toast.error(errMsg);
       return;
     }
-    console.log("handleConfirmSetup2FA > otpToken: ", otpToken);
+    setup2FA(user._id, otpToken).then((response) => {
+      toast.success("Setup 2FA successfully!");
+      handleSuccess && handleSuccess(response?.data?.data);
+      handleCloseModal();
+    });
   };
 
   useEffect(() => {
