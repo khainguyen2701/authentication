@@ -37,15 +37,16 @@ export const get2FA_QRCode_Service = async ({ id }) => {
 export const setup2FA_Service = async ({ id, clientOtpToken, userAgent }) => {
   try {
     const twoFA = await setup2FA_Model({ id, clientOtpToken, userAgent });
-    const pickUser = pick(twoFA, [
+    let pickUser = null;
+    pickUser = pick(twoFA, [
       "_id",
       "email",
       "enable_2fa",
       "is_2fa_verified",
       "last_login",
-      "is_2fa_verified",
       "device_id"
     ]);
+    pickUser.id = pickUser._id;
     return pickUser;
   } catch (error) {
     throw error;
