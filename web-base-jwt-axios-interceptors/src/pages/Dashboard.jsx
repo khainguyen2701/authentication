@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutApi } from "~/apis";
+import Require2FA from "~/components/Require2FA";
 import Setup2FA from "~/components/Setup2FA";
 import axiosInstance from "~/utils/axiosConfig";
 
@@ -19,6 +20,7 @@ function Dashboard() {
 
   useEffect(() => {
     const id = JSON.parse(localStorage.getItem("userInfo"))?.id;
+    console.log(JSON.parse(localStorage.getItem("userInfo")));
     const fetchData = async () => {
       try {
         const res = await axiosInstance.get(`/v1/users/profile/${id}`);
@@ -110,6 +112,9 @@ function Dashboard() {
         user={user}
         handleSuccess={handleSuccess2FA}
       />
+      {user.enable_2fa && !user.is_2fa_verified && (
+        <Require2FA user={user} handleSuccess={handleSuccess2FA} />
+      )}
     </Box>
   );
 }
