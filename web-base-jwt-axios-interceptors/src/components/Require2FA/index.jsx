@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import SecurityIcon from "@mui/icons-material/Security";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { setup2FA } from "~/apis";
+import { verify2FA } from "~/apis";
 
 function Require2FA({ user, handleSuccess }) {
   const [otpToken, setConfirmOtpToken] = useState("");
@@ -19,8 +19,8 @@ function Require2FA({ user, handleSuccess }) {
       toast.error(errMsg);
       return;
     }
-    setup2FA(user._id, otpToken).then((response) => {
-      toast.success("Setup 2FA successfully!");
+    verify2FA(user._id, otpToken).then((response) => {
+      toast.success("Verify 2FA successfully!");
       handleSuccess && handleSuccess(response?.data?.data);
     });
   };

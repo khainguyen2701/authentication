@@ -25,7 +25,7 @@ function Login() {
       const res = await axiosInstance.post("/v1/users/login", data);
       const user = res?.data?.data;
       const userInfo = {
-        id: user._id,
+        _id: user._id,
         email: user.email,
         isEnable2FA: user.enable_2fa
       };

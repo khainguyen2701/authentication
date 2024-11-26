@@ -19,7 +19,7 @@ function Dashboard() {
   const [openSetup2FA, setOpenSetup2FA] = useState(false);
 
   useEffect(() => {
-    const id = JSON.parse(localStorage.getItem("userInfo"))?.id;
+    const id = JSON.parse(localStorage.getItem("userInfo"))?._id;
     console.log(JSON.parse(localStorage.getItem("userInfo")));
     const fetchData = async () => {
       try {
@@ -53,6 +53,9 @@ function Dashboard() {
   const handleLogout = async () => {
     try {
       await logoutApi();
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       setUser(null);
       navigate("/login");
     } catch (error) {
