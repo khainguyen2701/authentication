@@ -6,8 +6,9 @@ import {
   detailUserService,
   get2FA_QRCode_Service,
   loginService,
-  profileService,
-  setup2FA_Service
+  logoutService,
+  setup2FA_Service,
+  verify2FA_Service
 } from "~/services/userService";
 import ApiError from "~/until/apiError";
 
@@ -15,7 +16,8 @@ const login = async (req, res, next) => {
   try {
     const user = await loginService({
       email: req.body.email,
-      password: req.body.password
+      password: req.body.password,
+      deviceId: req.headers["user-agent"]
     });
 
     // Create access token
@@ -61,14 +63,13 @@ const logout = async (req, res, next) => {
   try {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
-    res.actionResponse("get", {}, StatusCodes.OK, "Logout API success!");
+
+    const id = req.params.id;
+    const deviceId = req.headers["user-agent"];
+    const resLogout = await logoutService({ id, deviceId });
+    res.actionResponse("get", resLogout, StatusCodes.OK, "Logout API success!");
   } catch (error) {
-    const resError = ApiError(
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      error.message || "Internal Server Error",
-      []
-    );
-    next(resError);
+    next(error);
   }
 };
 
@@ -116,8 +117,11 @@ const refreshToken = async (req, res, next) => {
 const getUserProfile = async (req, res, next) => {
   try {
     const id = req.params.id;
+    const deviceId = req.headers["user-agent"];
+
     const profile = await detailUserService({
-      id: id
+      id,
+      deviceId
     });
 
     res.actionResponse(
@@ -153,7 +157,7 @@ const setup2FA = async (req, res, next) => {
   try {
     const id = req.params.id;
     const clientOtpToken = req.body.otpToken;
-    const userAgent = `${req.headers["user-agent"]}-${new Date().valueOf()}`;
+    const userAgent = `${req.headers["user-agent"]}`;
     const twoFA = await setup2FA_Service({
       id: id,
       clientOtpToken: clientOtpToken,
@@ -171,11 +175,33 @@ const setup2FA = async (req, res, next) => {
   }
 };
 
+export const verify2FA = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const clientOtpToken = req.body.otpToken;
+    const userAgent = `${req.headers["user-agent"]}`;
+    const twoFA = await verify2FA_Service({
+      id: id,
+      clientOtpToken,
+      userAgent
+    });
+    res.actionResponse(
+      "get",
+      { ...twoFA },
+      StatusCodes.OK,
+      "Verify 2FA QRCode success!"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const userController = {
   login,
   logout,
   refreshToken,
   getUserProfile,
   get2FA_QRCode,
-  setup2FA
+  setup2FA,
+  verify2FA
 };

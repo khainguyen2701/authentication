@@ -7,7 +7,7 @@ const Router = express.Router();
 Router.route("/login").post(userController.login);
 
 // API đăng xuất.
-Router.route("/logout").delete(userController.logout);
+Router.route("/logout/:id").delete(userController.logout);
 
 // API Refresh Token - Cấp lại Access Token mới.
 Router.route("/refresh_token").put(userController.refreshToken);
@@ -17,5 +17,7 @@ Router.route("/profile/:id").get(userController.getUserProfile);
 Router.route("/:id/get_2fa_qr_code").get(userController.get2FA_QRCode);
 
 Router.route("/:id/setup_2fa").post(userController.setup2FA);
+
+Router.route("/:id/verify_2fa").post(userController.verify2FA);
 
 export const userRoute = Router;
